@@ -8,9 +8,11 @@ This module contains all the classes you would want to invoke to do the followin
 - Create a Dataset and Store it. (from the cloud)
 - Fine-tune a model on a dataset and save the finetuned tensors in the backend for later use.
 
-
+Clone this repository on your device. 
 ## First Steps
-Step 0: Clone this project onto your device.
+
+Step 0: Create a client object using the Client Class 
+
 Step 1. import the required classes from the rungpu module into your blank script. You would have to import from the whole path to the module like so:
 
 ``` from <path-to-library>/rungpu import Model```
@@ -23,13 +25,15 @@ Step 1. import the required classes from the rungpu module into your blank scrip
     -- config.json
     ```
 {
-  "type": "azureblob",
-  "env_auth": "false",
-  "account": "rungpudev",
-  "key": "<key>",
-  "sas_url": "<sas_url>",
-  "src_file": "datasets/test.txt",
-  "dest_file": "data.txt"
+    "config": {
+        "type": "s3",
+        "provider": "AWS",
+        "env_auth": "false",
+        "access_key_id": <Your AWS ACCESS KEY ID>,
+        "secret_access_key": <Your AWS Secret ACCESS KEY>,
+        "region": "us-east-1",
+        "src_file": "/rungpu-dev/test.txt",
+    }
 }
      ```
 
@@ -61,30 +65,32 @@ Now this is where you have to get specific. Building config is basically creatin
 
 ```
 {
-  "root_path": "./models",
-  "quant": 8,
-  "num_steps": 300,
-  "base_path": "microsoft/phi-2",
-  "strategy": "lora",
-  "checkpoint_steps": 100,
-  "peft_config": {
-    "lora": {
-      "r": 16,
-      "alpha": 16,
-      "target_modules": [
-        "q_proj",
-        "k_proj",
-        "v_proj",
-        "o_proj",
-        "gate_proj",
-        "up_proj",
-        "down_proj",
-        "lm_head"
-      ],
-      "bias": "none",
-      "lora_dropout": 0.05
+    "base_model": "mistralai/Mistral-7B-Instruct-v0.2",
+    "quant": 8,
+    "num_steps": 100,
+    "strategy": "lora",
+    "checkpoint_steps": 10,
+    "training_size": 1000,
+    "model_max_length": 4096,
+    "prompt_max_length": 512,
+    "peft_config": {
+        "lora": {
+            "r": 16,
+            "alpha": 16,
+            "target_modules": [
+                "q_proj",
+                "k_proj",
+                "v_proj",
+                "o_proj",
+                "gate_proj",
+                "up_proj",
+                "down_proj",
+                "lm_head"
+            ],
+            "bias": "none",
+            "lora_dropout": 0.05
+        }
     }
-  }
 }
 ```
 
@@ -108,17 +114,79 @@ This json would essentially encapsulate the nitty gritty details of your Finetun
 
 ```
 	from rungpu import Finetune
-        finetune = Finetune(config)
+        finetune = Finetune(config=config, config_path = config_path)
 ```
+
+You can either provide the config from a .json file by entering the filepath in the config_path argument or provide the raw json config in the config argument.
 
 Step 3: Make the start_finetune() call to trigger the finetune job in the backend
 
 ```
-  finetune.start_finetune()
+  run_id = finetune.run_finetune()
 ```
 This call starts a finetune job. You get an instant response message from the server describing your job, the config and when your finetune job has started. 
 
 
+Step 4: Check the status of your job. 
 
+Create a status object, using the Status() class, and pass the run_id , which was created when your finetuning job was kicked off. 
+
+```
+status = Status(run_id)
+
+status = status.get_status()
+
+```
+
+this command returns an object like so: 
+
+```
+{'RunID': 'mistralai-Mistral-7B-Instruct-v0.2-8-bit-d52939f8-2b12-11ef-a04b-b8ca3a5c98fc-rungpu_dataset_efe1cfa4-8575-46c4-b11c-e3ba0a91d5c9',
+ 'time_elapsed': '43.20548573333333',
+ 'RunStatus': {'command': 'Finetune',
+  'status': 'RUNNING',
+  'phase': 'MODEL_EXPORT',
+  'client_id': 'arun_prasad',
+  'model_id': '<mistralai-Mistral-unique_model_id>',
+  'base_model': 'mistralai/Mistral-7B-Instruct-v0.2',
+  'dataset_id': '<rungpu_dataset_id>',
+  'run_start': '2024-06-15 22:28:55.848158',
+  'run_end': 'null',
+  'export_start': '2024-06-15 22:44:36.149066',
+  'export_end': 'null',
+  'quantization': 8,
+  'strategy': 'lora',
+  'checkpoint_steps': 10,
+  'training_steps': 100,
+  'training_split': 1000,
+  'peft_config': {'lora': {'r': 16,
+    'alpha': 16,
+    'target_modules': ['q_proj',
+     'k_proj',
+     'v_proj',
+     'o_proj',
+     'gate_proj',
+     'up_proj',
+     'down_proj',
+     'lm_head'],
+    'bias': 'none',
+    'lora_dropout': 0.05}},
+  'run_history': [{'loss': 1.7817,
+    'grad_norm': 3.3305726051330566,
+    'learning_rate': 0.0,
+    'epoch': 0.46029919447640966,
+    'step': 100},
+   {'train_runtime': 835.0842,
+    'train_samples_per_second': 0.958,
+    'train_steps_per_second': 0.12,
+    'total_flos': 1.75796669251584e+16,
+    'train_loss': 1.7816670227050782,
+    'epoch': 0.46029919447640966,
+    'step': 100}]}}
+
+```
+
+
+This status is refreshed as the job progresses. You can run this cell over and over again to check how long it takes to run each training phase of the job.
 
 
