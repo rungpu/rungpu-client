@@ -1,6 +1,6 @@
 # Welcome to Rungpu!
 
-## This is short document that helps you kickstart your finetuning Journey with Rungpu.
+## This is short document that helps you kickstart your finetuning journey with Rungpu.
 
 We provide you with the client side python module - rungpu.py
 This module contains all the classes you would want to invoke to do the following tasks: 
