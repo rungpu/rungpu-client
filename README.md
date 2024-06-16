@@ -9,11 +9,18 @@ This module contains all the classes you would want to invoke to do the followin
 - Fine-tune a model on a dataset and save the finetuned tensors in the backend for later use.
 
 Clone this repository on your device. 
+
 ## First Steps
 
-Step 0: Create a client object using the Client Class 
+#### Step 0: Create a client object using the Client Class 
 
-Step 1. import the required classes from the rungpu module into your blank script. You would have to import from the whole path to the module like so:
+Creating a client class with the client id and client_secret we provide you to be able to execute library funcitons. The keys could be stored in your system.ini file or hardcoded in your notebook. 
+
+```
+	client = Client(client_id, client_secret)
+```
+
+#### Step 1. import the required classes from the rungpu module into your blank script. You would have to import from the whole path to the module like so:
 
 ``` from <path-to-library>/rungpu import Model```
 
@@ -120,7 +127,7 @@ This json would essentially encapsulate the nitty gritty details of your Finetun
 
 You can either provide the config from a .json file by entering the filepath in the config_path argument or provide the raw json config in the config argument.
 
-Step 3: Make the start_finetune() call to trigger the finetune job in the backend
+#### Step 3: Make the start_finetune() call to trigger the finetune job in the backend
 
 ```
   run_id = finetune.run_finetune()
@@ -128,7 +135,7 @@ Step 3: Make the start_finetune() call to trigger the finetune job in the backen
 This call starts a finetune job. You get an instant response message from the server describing your job, the config and when your finetune job has started. 
 
 
-Step 4: Check the status of your job. 
+#### Step 4: Check the status of your job. 
 
 Create a status object, using the Status() class, and pass the run_id , which was created when your finetuning job was kicked off. 
 
