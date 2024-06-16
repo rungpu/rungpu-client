@@ -23,7 +23,7 @@ Step 1. import the required classes from the rungpu module into your blank scrip
   The config for which looks like following: 
 
     -- config.json
-    ```
+```
 {
     "config": {
         "type": "s3",
