@@ -35,7 +35,8 @@ Step 1. import the required classes from the rungpu module into your blank scrip
         "src_file": "/rungpu-dev/test.txt",
     }
 }
-     ```
+     
+```
 
   This config needs to be stored in a file.or directly entered as a json object variable.The file path needs to be entered as a parameter to a Dataset object like the following script. 
 
