@@ -17,7 +17,7 @@ Clone this repository on your device.
 Creating a client class with the client id and client_secret we provide you to be able to execute library funcitons. The keys could be stored in your system.ini file or hardcoded in your notebook. 
 
 ```
-	client = Client(client_id, client_secret)
+client = Client(client_id, client_secret)
 ```
 
 #### Step 1. import the required classes from the rungpu module into your blank script. You would have to import from the whole path to the module like so:
