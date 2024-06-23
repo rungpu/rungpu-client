@@ -15,15 +15,18 @@ class Client:
 
 class Status:
 
-    def __init__(self,run_id):
+    def __init__(self,client,run_id):
+        self.client=client
         self.run_id = run_id
         self.base_model = None
         self.quantization = None
 
     def get_status(self):
-
+        
         url = f"{base_url}/runstatus"
         status_config = {"run_id":self.run_id}
+        status_config['client_id'] = self.client.client_id
+        status_config['client_secret'] = self.client.client_secret
         status_json = json.dumps(status_config)
         response = requests.get(url, json=status_config)
         data = json.loads(response.text)
@@ -86,8 +89,9 @@ class Model:
 
 class Dataset:
 
-    def __init__(self,client, config = None, config_path= None):
+    def __init__(self,client,mode='train', config = None, config_path= None):
         self.client = client
+        self.mode = mode
         if config is None and config_path is None:
             raise ValueError('You need to provide a valid json config, or the path to your valid json config file. ')
         elif config is None and config_path is not None:
@@ -98,6 +102,7 @@ class Dataset:
         else:
             self.config = config
             self.config_path = config
+            
         
     
     def create_dataset(self):
@@ -105,6 +110,7 @@ class Dataset:
         dataset_json = self.config
         dataset_json["client_id"] = self.client.client_id
         dataset_json["client_secret"] = self.client.client_secret
+        dataset_json["mode"] = self.mode
         url = f"{base_url}/create-dataset"
         response = requests.post(url, json=dataset_json)
         data = json.loads(response.text)
@@ -145,12 +151,28 @@ class Finetune:
     def get_model(self,model_id):
         url = f"{base_url}/getmodel"
         model_config = {'model_id':model_id}
+        model_config['client_id'] = self.client.client_id
+        model_config['client_secret'] = self.client.client_secret 
         response = requests.get(url,json=model_config)
         return response.json()
         
 
     
 
-    
-
+class Inference:
+    def __init__(self,client,model_id, dataset_id):
+        self.model_id = model_id
+        self.dataset_id = dataset_id
+        self.client = client
+   
+    def run_inference(self):
+        url = f"{base_url}/inference"
+        print(url)
+        model_config = {"model_id": self.model_id, "dataset_id": self.dataset_id}
+        model_config['client_id'] = self.client.client_id
+        model_config['client_secret'] = self.client.client_secret
+        print(model_config)
+        response = requests.get(url,json=model_config)
+        print(response)
+        return response.json()
 
