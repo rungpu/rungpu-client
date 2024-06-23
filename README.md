@@ -45,7 +45,20 @@ client = Client(client_id, client_secret)
      
 ```
 
-  This config needs to be stored in a file.or directly entered as a json object variable.The file path needs to be entered as a parameter to a Dataset object like the following script. 
+#### The Google Drive option. 
+
+In case you don't have access to a cloud based environment to store your dataset, you can always get started with google drive. Just upload your file to google drive and and get a shareable link to that file, which can be used to 
+create the following config: 
+
+```
+	config = {'config':
+            {'type':'google_drive',
+             'src_file':'<shareable_gdrive_link>'
+             }
+         }
+```
+
+  This config needs to be stored in a file or directly entered as a json object variable.The file path needs to be entered as a parameter to a Dataset object like the following script. 
 
   ```
     from rungpu import Dataset
