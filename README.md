@@ -26,8 +26,23 @@ client = Client(client_id, client_secret)
 
 
 ### Create a Dataset
-  To create a dataset, one must have a text file that's pre-formatted sitting in a cloud server. Given the credentials, rungpu pulls the file into the server and stores it under a specific dataset_id
-  The config for which looks like following: 
+  To create a dataset, one must have a text file that's pre-formatted and accessible via https or on a Cloud Storage(AWS, GCP, Azure Fileshare). 
+  Given the credentials, rungpu pulls the file into the server and stores it under a specific dataset_id
+
+    A dataset is a document or a corpus of text that holds the knowledge you would want to train your chatbot for a specific use-case.
+    
+    "Here's what a sample dataset in jsonl format looks like: \n",
+    [ 
+        {\"prompt\": \"What is the capital of France?\", \"response\": \"Paris\"},\n",
+        {\"prompt\": \"Who wrote 'To Kill a Mockingbird'?\", \"response\": \"Harper Lee\"},\n",
+        {\"prompt\": \"What is the boiling point of water?\", \"response\": \"100°C or 212°F\"},\n",
+        {\"prompt\": \"Who painted the Mona Lisa?\", \"response\": \"Leonardo da Vinci\"},\n",
+        {\"prompt\": \"What is the largest planet in our solar system?\", \"response\": \"Jupiter\"},\n",
+        {\"prompt\": \"What year did the Titanic sink?\", \"response\": \"1912\"},\n",
+    ]
+
+
+  The config for access the dataset is stored in a json file ; the json example: 
 
     -- config.json
 ```
@@ -94,6 +109,7 @@ Now this is where you have to get specific. Building config is basically creatin
     "training_size": 1000,
     "model_max_length": 4096,
     "prompt_max_length": 512,
+    "gguf_flag": False,
     "peft_config": {
         "lora": {
             "r": 16,
@@ -153,7 +169,7 @@ This call starts a finetune job. You get an instant response message from the se
 Create a status object, using the Status() class, and pass the run_id , which was created when your finetuning job was kicked off. 
 
 ```
-status = Status(run_id)
+status = Status(client,run_id)
 
 status = status.get_status()
 
