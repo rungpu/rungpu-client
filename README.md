@@ -31,14 +31,15 @@ client = Client(client_id, client_secret)
 
     A dataset is a document or a corpus of text that holds the knowledge you would want to train your chatbot for a specific use-case.
     
-    "Here's what a sample dataset in jsonl format looks like: \n",
+    A sample dataset in jsonl format looks like:
+
     [ 
-        {\"prompt\": \"What is the capital of France?\", \"response\": \"Paris\"},\n",
-        {\"prompt\": \"Who wrote 'To Kill a Mockingbird'?\", \"response\": \"Harper Lee\"},\n",
-        {\"prompt\": \"What is the boiling point of water?\", \"response\": \"100°C or 212°F\"},\n",
-        {\"prompt\": \"Who painted the Mona Lisa?\", \"response\": \"Leonardo da Vinci\"},\n",
-        {\"prompt\": \"What is the largest planet in our solar system?\", \"response\": \"Jupiter\"},\n",
-        {\"prompt\": \"What year did the Titanic sink?\", \"response\": \"1912\"},\n",
+        {"prompt": "What is the capital of France?", "response": "Paris"},
+        {"prompt": "Who wrote 'To Kill a Mockingbird'?", "response": "Harper Lee"},
+        {"prompt": "What is the boiling point of water?", "response": "100°C or 212°F"},
+        {"prompt": "Who painted the Mona Lisa?", "response": "Leonardo da Vinci"},
+        {"prompt": "What is the largest planet in our solar system?", "response": "Jupiter"},
+        {"prompt": "What year did the Titanic sink?", "response": "1912"},
     ]
 
 
