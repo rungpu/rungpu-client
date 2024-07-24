@@ -14,9 +14,9 @@ class Client:
 
 
 class TrainStatus:
-
     def __init__(self,client,train_id):
         self.client=client
+        self.train_id = train_id
         self.train_id = train_id
         self.base_model = None
         self.quantization = None
@@ -25,14 +25,17 @@ class TrainStatus:
         
         url = f"{base_url}/trainstatus"
         status_config = {"train_id":self.train_id}
+        url = f"{base_url}/trainstatus"
+        status_config = {"train_id":self.train_id}
         status_config['client_id'] = self.client.client_id
         status_config['client_secret'] = self.client.client_secret
         status_json = json.dumps(status_config)
         response = requests.get(url, json=status_config)
         data = json.loads(response.text)
+        print(data)
 
         return data
-    
+         
     @staticmethod      
     def get_jobs(client,type='json'):
         client_id = client.client_id
@@ -51,29 +54,32 @@ class TrainStatus:
         status = self.get_status()
         self.base_model = status['train_status']['base_model'].replace('/','-')
         self.quantization = status['train_status']['quantization']
+        self.base_model = status['train_status']['base_model'].replace('/','-')
+        self.quantization = status['train_status']['quantization']
         while True:
             data = {"train_id":self.train_id, "offset": offset,"training":training,"logfile":f"{self.base_model}/{self.quantization}"}
-            data["client_id"] = self.client.client_id
-            data["client_secret"] = self.client.client_secret
             response = requests.get(url,json=data)
             obj = json.loads(response.text)
             if(obj['log']):
-                message = obj["text"]
-                size = obj['size']
-                offset = obj['offset'] 
-                training = obj['training']
-                sleep_time = obj['sleep']
-                sleep(sleep_time)
-                msg_split = message.split('\n')
-                message = msg_split[0]
-                offset-= len(' '.join(msg_split[1:]))
-                if ("Training completed." in message):
-                    print("Training Completed.")
-                    break
-                if message == '':
-                    print('',end="")
-                else:
-                    print(message)
+                print("The logs will commence printing in a few seconds...")
+                if(obj['log']):
+                    message = obj["text"]
+                    size = obj['size']
+                    offset = obj['offset'] 
+                    training = obj['training']
+                    sleep_time = obj['sleep']
+                    sleep(sleep_time)
+                    msg_split = message.split('\n')
+                    message = msg_split[0]
+                    offset-= len(' '.join(msg_split[1:]))
+                    if ("Training completed." in message):
+                        print("Training Completed.")
+                        break
+                    if message == '':
+                        print('',end="")
+                    else:
+                        print(message)
+            
             else:
                 print("Your Job is still in the queue")
                 print("will retry in 30 seconds...")
@@ -238,6 +244,7 @@ class Finetune:
 
     
 
+class Eval:
 class Eval:
     def __init__(self,client,model_id, dataset_id):
         self.model_id = model_id
