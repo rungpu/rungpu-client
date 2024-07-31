@@ -30,6 +30,7 @@ class TrainStatus:
         status_json = json.dumps(status_config)
         response = requests.get(url, json=status_config)
         data = json.loads(response.text)
+        print(response.status_code)
         print(data)
 
         return data
@@ -55,10 +56,11 @@ class TrainStatus:
         self.quantization = status['train_status']['quantization']
         while True:
             data = {"train_id":self.train_id, "offset": offset,"training":training,"logfile":f"{self.base_model}/{self.quantization}"}
+            data["client_id"] = self.client.client_id
+            data["client_secret"] = self.client.client_secret
             response = requests.get(url,json=data)
             obj = json.loads(response.text)
             if(obj['log']):
-                print("The logs will commence printing in a few seconds...")
                 message = obj["text"]
                 size = obj['size']
                 offset = obj['offset'] 
@@ -78,7 +80,29 @@ class TrainStatus:
             else:
                 print("Your Job is still in the queue")
                 break
-        
+       
+    
+
+class EvalStatus:
+
+    def __init__(self,client,model_id,dataset_id):
+        self.client = client
+        self.model_id = model_id
+        self.dataset_id = dataset_id
+
+
+    def get_eval_status(self):
+        url = f"{base_url}/evalstatus"
+        status_config = {"model_id": f"{self.model_id}", "dataset_id":f"{self.dataset_id}"}
+        status_config["client_id"] = self.client.client_id
+        status_config["client_secret"] = self.client.client_secret
+        response = requests.get(url, json=status_config)
+        data = json.loads(response.text)
+        print(response.status_code)
+        print(data)
+        return data
+    
+ 
 
 class Model:
     def __init__(self, config):
@@ -171,13 +195,12 @@ class Eval:
         self.client = client
    
     def run_inference(self):
-        url = f"{base_url}/inference"
-        print(url)
+        url = f"{base_url}/eval"
         model_config = {"model_id": self.model_id, "dataset_id": self.dataset_id}
         model_config['client_id'] = self.client.client_id
         model_config['client_secret'] = self.client.client_secret
         print(model_config)
-        response = requests.get(url,json=model_config)
+        response = requests.post(url,json=model_config)
         print(response)
         return response.json()
 
