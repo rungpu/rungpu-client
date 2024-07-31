@@ -32,6 +32,7 @@ class TrainStatus:
         status_json = json.dumps(status_config)
         response = requests.get(url, json=status_config)
         data = json.loads(response.text)
+        print(response.status_code)
         print(data)
 
         return data
@@ -58,6 +59,8 @@ class TrainStatus:
         self.quantization = status['train_status']['quantization']
         while True:
             data = {"train_id":self.train_id, "offset": offset,"training":training,"logfile":f"{self.base_model}/{self.quantization}"}
+            data["client_id"] = self.client.client_id
+            data["client_secret"] = self.client.client_secret
             response = requests.get(url,json=data)
             obj = json.loads(response.text)
             if(obj['log']):
