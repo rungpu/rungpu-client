@@ -97,9 +97,11 @@ class EvalStatus:
         status_config["client_id"] = self.client.client_id
         status_config["client_secret"] = self.client.client_secret
         response = requests.get(url, json=status_config)
-        data = json.loads(response.text)
-        print(response.status_code)
-        print(data)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+        else:
+            data = {"message":"There was a problem retrieving the status.Please try again"}
+
         return data
     
  
