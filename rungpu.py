@@ -30,8 +30,6 @@ class TrainStatus:
         status_json = json.dumps(status_config)
         response = requests.get(url, json=status_config)
         data = json.loads(response.text)
-        print(response.status_code)
-        print(data)
 
         return data
     
@@ -41,7 +39,6 @@ class TrainStatus:
         url = f"{base_url}/viewruns"
         client_id = {"client_id": client_id}
         response = requests.get(url, json=client_id)
-        print(response.status_code)
         data = json.loads(response.text)
         
         df = pd.DataFrame(data['jobs'])
@@ -103,6 +100,24 @@ class EvalStatus:
             data = {"message":"There was a problem retrieving the status.Please try again"}
 
         return data
+    
+    def stream_responses(self, line=0):
+        url = f"{base_url}/evalstream"
+
+        status_config = {"model_id": f"{self.model_id}", "dataset_id":f"{self.dataset_id}", "line": 0}
+        status_config["client_id"] = self.client.client_id
+        status_config["client_secret"] = self.client.client_secret
+
+        response = requests.get(url,json=status_config)
+        
+        if response.status_code ==200:
+            return response.text
+        else:
+            return "There was a problem Streaming the response."
+
+
+
+       
     
  
 
@@ -201,9 +216,8 @@ class Eval:
         model_config = {"model_id": self.model_id, "dataset_id": self.dataset_id}
         model_config['client_id'] = self.client.client_id
         model_config['client_secret'] = self.client.client_secret
-        print(model_config)
+        print(f"Model Configuration : \n{model_config}")
         response = requests.post(url,json=model_config)
-        print(response)
         return response.json()
 
 
