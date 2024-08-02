@@ -76,7 +76,9 @@ class TrainStatus:
                     print(message)
             else:
                 print("Your Job is still in the queue")
-                break
+                print("will retry in 30 seconds...")
+                sleep(30)
+                
        
     
 
