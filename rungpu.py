@@ -32,8 +32,6 @@ class TrainStatus:
         status_json = json.dumps(status_config)
         response = requests.get(url, json=status_config)
         data = json.loads(response.text)
-        print(response.status_code)
-        print(data)
 
         return data
          
