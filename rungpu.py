@@ -103,10 +103,10 @@ class EvalStatus:
 
         return data
     
-    def stream_responses(self, line=0):
+    def get_responses(self, line=0):
         url = f"{base_url}/evalstream"
 
-        status_config = {"model_id": f"{self.model_id}", "dataset_id":f"{self.dataset_id}", "line": 0}
+        status_config = {"model_id": f"{self.model_id}", "dataset_id":f"{self.dataset_id}"}
         status_config["client_id"] = self.client.client_id
         status_config["client_secret"] = self.client.client_secret
 
@@ -116,6 +116,37 @@ class EvalStatus:
             return response.text
         else:
             return "There was a problem Streaming the response."
+    
+    def eval_progress(self,offset=0,flag=0):
+        url = f"{base_url}/eval_progress"
+        flag = flag
+        while True:
+            data = {"model_id":self.model_id,"dataset_id": self.dataset_id, "offset": offset,"flag":flag}
+            data["client_id"] = self.client.client_id
+            data["client_secret"] = self.client.client_secret
+            response = requests.get(url,json=data)
+            obj = json.loads(response.text)
+            if(obj['log']):
+                message = obj["text"]
+                size = obj['size']
+                offset = obj['offset'] 
+                flag = obj['training']
+                sleep_time = obj['sleep']
+                sleep(sleep_time)
+                msg_split = message.split('\n')
+                message = msg_split[0]
+                offset-= len(' '.join(msg_split[1:]))
+                if ("**END**" in message):
+                    print("EVAL COMPLETED")
+                    break
+                if message == '':
+                    print('',end="")
+                else:
+                    print(message)
+            else:
+                print("Your Job is still in the queue")
+                print("will retry in 30 seconds...")
+                sleep(30)
 
 
 
