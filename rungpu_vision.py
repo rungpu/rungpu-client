@@ -19,13 +19,61 @@ class Model:
         self.config = config
     
     def train_model(self):
-        url = f"{base_url}/vision"
-        config = self.config
-        config["client_id"] = str(self.client.client_id)
-        config["client_secret"] = str(self.client.client_secret)
-        response = requests.post(url, json=self.config)
+        img_flag = self.check_data(self.config['dataset_id'])
+        
+        if(img_flag['dataset_status']['status'] and img_flag['dataset_status']['status'] == 'COMPLETED'):
+            url = f"{base_url}/vision"
+            config = self.config
+            config["client_id"] = str(self.client.client_id)
+            config["client_secret"] = str(self.client.client_secret)
+            response = requests.post(url, json=self.config)
+            data = json.loads(response.text)
+            return data
+        else:
+            return {"message": "Your dataset hasn't been created yet please try in some time."}
+
+    def check_data(self,dataset_id):
+        url = f"{base_url}/visiondatastatus"
+        dataset_config = self.config
+        dataset_config['dataset_id'] = dataset_id
+        dataset_config['client_id'] = self.client.client_id
+        dataset_config['client_secret'] = self.client.client_secret
+        status_json = json.dumps(dataset_config)
+        response = requests.get(url, json=dataset_config)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            return data
+        else:
+            return {"message": "Something Went wrong"}
+
+
+class VisionDataset:
+    def __init__(self,client,config):
+        self.client = client
+        self.config = config
+
+    def create_dataset(self):
+        url = f"{base_url}/visiondataset"
+        dataset_config = self.config
+        dataset_config['client_id'] = self.client.client_id
+        dataset_config['client_secret'] = self.client.client_secret
+        status_json = json.dumps(dataset_config)
+        response = requests.post(url, json=dataset_config)
         data = json.loads(response.text)
         return data
+    
+    def check_data(self,dataset_id):
+        url = f"{base_url}/visiondatastatus"
+        dataset_config = self.config
+        dataset_config['dataset_id'] = dataset_id
+        dataset_config['client_id'] = self.client.client_id
+        dataset_config['client_secret'] = self.client.client_secret
+        status_json = json.dumps(dataset_config)
+        response = requests.get(url, json=dataset_config)
+        data = json.loads(response.text)
+        return data
+    
+
 
 class VisionStatus:
     def __init__(self,client,model_id):
