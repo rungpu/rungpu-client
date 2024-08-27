@@ -244,8 +244,6 @@ class Finetune:
         
 
     
-
-class Eval:
 class Eval:
     def __init__(self,client,model_id, dataset_id):
         self.model_id = model_id
