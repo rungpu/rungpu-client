@@ -13,18 +13,20 @@ class Client:
         self.client_secret = client_secret
 
 
-class Status:
-
-    def __init__(self,client,run_id):
+class TrainStatus:
+    def __init__(self,client,train_id):
         self.client=client
-        self.run_id = run_id
+        self.train_id = train_id
+        self.train_id = train_id
         self.base_model = None
         self.quantization = None
 
     def get_status(self):
         
-        url = f"{base_url}/runstatus"
-        status_config = {"run_id":self.run_id}
+        url = f"{base_url}/trainstatus"
+        status_config = {"train_id":self.train_id}
+        url = f"{base_url}/trainstatus"
+        status_config = {"train_id":self.train_id}
         status_config['client_id'] = self.client.client_id
         status_config['client_secret'] = self.client.client_secret
         status_json = json.dumps(status_config)
@@ -32,14 +34,13 @@ class Status:
         data = json.loads(response.text)
 
         return data
-    
-    @staticmethod
+         
+    @staticmethod      
     def get_jobs(client,type='json'):
         client_id = client.client_id
         url = f"{base_url}/viewruns"
         client_id = {"client_id": client_id}
         response = requests.get(url, json=client_id)
-        print(response.status_code)
         data = json.loads(response.text)
         
         df = pd.DataFrame(data['jobs'])
@@ -50,30 +51,112 @@ class Status:
         url = f"{base_url}/progress"
         training = training
         status = self.get_status()
-        self.base_model = status['RunStatus']['base_model'].replace('/','-')
-        self.quantization = status['RunStatus']['quantization']
+        self.base_model = status['train_status']['base_model'].replace('/','-')
+        self.quantization = status['train_status']['quantization']
+        self.base_model = status['train_status']['base_model'].replace('/','-')
+        self.quantization = status['train_status']['quantization']
         while True:
-            
-            data = {"run_id":self.run_id, "offset": offset,"training":training,"logfile":f"{self.base_model}/{self.quantization}"}
+            data = {"train_id":self.train_id, "offset": offset,"training":training,"specs":{"base_model":self.base_model, "quantization": self.quantization}}
+            data["client_id"] = self.client.client_id
+            data["client_secret"] = self.client.client_secret
             response = requests.get(url,json=data)
             obj = json.loads(response.text)
-            message = obj["text"]
-            size = obj['size']
-            offset = obj['offset'] 
-            training = obj['training']
-            sleep_time = obj['sleep']
-            sleep(sleep_time)
-            msg_split = message.split('\n')
-            message = msg_split[0]
-            offset-= len(' '.join(msg_split[1:]))
-            if ("Training completed." in message):
-                print("Training Completed.")
-                break
-            if message == '':
-                print('',end="")
+            if(obj['log']):
+                message = obj["text"]
+                size = obj['size']
+                offset = obj['offset'] 
+                training = obj['training']
+                sleep_time = obj['sleep']
+                sleep(sleep_time)
+                msg_split = message.split('\n')
+                message = msg_split[0]
+                offset-= len(' '.join(msg_split[1:]))
+                if ("Training completed." in message):
+                    print("Training Completed.")
+                    break
+                if message == '':
+                    print('',end="")
+                else:
+                    print(message)
+            
             else:
-                print(message)
+                print("Your Job is still in the queue")
+                print("will retry in 30 seconds...")
+                sleep(30)
+                
+       
+    
+
+class EvalStatus:
+
+    def __init__(self,client,model_id,dataset_id):
+        self.client = client
+        self.model_id = model_id
+        self.dataset_id = dataset_id
+
+
+    def get_eval_status(self):
+        url = f"{base_url}/evalstatus"
+        status_config = {"model_id": f"{self.model_id}", "dataset_id":f"{self.dataset_id}"}
+        status_config["client_id"] = self.client.client_id
+        status_config["client_secret"] = self.client.client_secret
+        response = requests.get(url, json=status_config)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+        else:
+            data = {"message":"There was a problem retrieving the status.Please try again"}
+
+        return data
+    
+    def get_responses(self, line=0):
+        url = f"{base_url}/evalstream"
+
+        status_config = {"model_id": f"{self.model_id}", "dataset_id":f"{self.dataset_id}"}
+        status_config["client_id"] = self.client.client_id
+        status_config["client_secret"] = self.client.client_secret
+
+        response = requests.get(url,json=status_config)
         
+        if response.status_code ==200:
+            return response.text
+        else:
+            return "There was a problem Streaming the response."
+    
+    def eval_progress(self,offset=0,flag=0):
+        url = f"{base_url}/eval_progress"
+        flag = flag
+        while True:
+            data = {"model_id":self.model_id,"dataset_id": self.dataset_id, "offset": offset,"flag":flag}
+            data["client_id"] = self.client.client_id
+            data["client_secret"] = self.client.client_secret
+            response = requests.get(url,json=data)
+            obj = json.loads(response.text)
+            if(obj['log']):
+                message = obj["text"]
+                size = obj['size']
+                offset = obj['offset'] 
+                flag = obj['training']
+                sleep_time = obj['sleep']
+                sleep(sleep_time)
+                msg_split = message.split('\n')
+                message = msg_split[0]
+                offset-= len(' '.join(msg_split[1:]))
+                if ("**END**" in message):
+                    print("EVAL COMPLETED")
+                    break
+                if message == '':
+                    print('',end="")
+                else:
+                    print(message)
+            else:
+                print("Your Job is still in the queue")
+                sleep(30)
+
+
+
+       
+    
+ 
 
 class Model:
     def __init__(self, config):
@@ -158,22 +241,19 @@ class Finetune:
         
 
     
-
-class Inference:
+class Eval:
     def __init__(self,client,model_id, dataset_id):
         self.model_id = model_id
         self.dataset_id = dataset_id
         self.client = client
    
     def run_inference(self):
-        url = f"{base_url}/inference"
-        print(url)
+        url = f"{base_url}/eval"
         model_config = {"model_id": self.model_id, "dataset_id": self.dataset_id}
         model_config['client_id'] = self.client.client_id
         model_config['client_secret'] = self.client.client_secret
-        print(model_config)
-        response = requests.get(url,json=model_config)
-        print(response)
+        print(f"Model Configuration : \n{model_config}")
+        response = requests.post(url,json=model_config)
         return response.json()
 
 
