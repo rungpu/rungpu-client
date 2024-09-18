@@ -45,6 +45,8 @@ class Model:
             return data
         else:
             return {"message": "Something Went wrong"}
+    
+
 
 
 class VisionDataset:
@@ -73,6 +75,7 @@ class VisionDataset:
         data = json.loads(response.text)
         return data
     
+    
 
 
 class VisionStatus:
@@ -91,6 +94,20 @@ class VisionStatus:
         data = json.loads(response.text)
 
         return data
+    
+    def get_download_links(self):
+        url = f"{base_url}/downloadvisionlink"
+        status_config = {"model_id":self.model_id}
+        status_config['client_id'] = self.client.client_id
+        status_config['client_secret'] = self.client.client_secret
+        status_json = json.dumps(status_config)
+        response = requests.get(url, json=status_config)
+        data = json.loads(response.text)
+
+        return data
+    
+
+    
     
     def progress(self,offset=0,training=0):
         url = f"{base_url}/progress"
@@ -126,3 +143,26 @@ class VisionStatus:
                 print("will retry in 30 seconds...")
                 sleep(30)
                 
+
+
+
+__copyright__ = """
+Copyright 2024. AI WHISPR PTY LTD
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to
+deal in the Software without restriction, including without limitation the
+rights to use, co, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:  The below
+copyright notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+"""
